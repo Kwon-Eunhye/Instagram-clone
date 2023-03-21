@@ -14,28 +14,178 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [articles, setArticles] = useState(null);
   const [articleCount, setArticleCount] = useState(0);
-  const [actvie, setActive] = useState(false);  // 모달 활성화
+  const [active, setActive] = useState(false);  // 모달 활성화
   const navigate = useNavigate();
 
-  console.log(username);
-  useEffect(() => {
-    setProfile(null);
+  // useEffect(() => {
+  //   setProfile(null);
 
-    Promise.all([ // 모든 항목이 다 성공했을때 동작
-      getProfile(username), 
+  //   Promise.all([ // 모든 항목이 다 성공했을때 동작
+  //     getProfile(username), 
+  //     getTimeline(username)
+  //   ])
+  //     .then(([profileDate, timelineData]) => {
+  //       setProfile(profileDate.profile);
+  //       setArticles(timelineData.articles);
+  //       setArticleCount(timelineData.articleCount);
+  //     })  
+  //     .catch(error => { // 한개라도 실패했을 경우 not found 페이지로 이동
+  //       navigate('/notfound', { replace: true })
+  //     })
+
+  // }, [username])
+
+  useEffect(() => {
+		setProfile(null);
+
+		Promise.all([
+			getProfile(username),
       getTimeline(username)
     ])
-      .then(([profileDate, timelineData]) => {
-        setProfile(profileDate.profile);
+      .then(([profileData, timelineData]) => {
+        setProfile(profileData.profile);
         setArticles(timelineData.articles);
         setArticleCount(timelineData.articleCount);
-      })  
-      .catch(error => { // 한개라도 실패했을 경우 not found 페이지로 이동
+      })
+      .catch(error => {
+        console.log(error)
         navigate('/notfound', { replace: true })
       })
 
-  }, [username])
+	}, [username])
+ 
+  // 로그아웃
+  function handleSignOut() {}
 
-  console.log(profile)
-  console.log(articles)
+  // 팔로우
+  async function handleFollow() {}
+
+
+  // 언팔로우
+  async function handleUnfollow() {}
+
+  useEffect(() => {
+    document.title = `${username} - Instagram`;
+  }, [])
+
+  if (!profile) {
+    return <p>fetching profile...</p>
+  }
+
+  return (
+    <>
+      <div className="px-4 mt-8">
+        <div className="flex">
+          <img 
+            src={`${process.env.REACT_APP_SERVER}/files/profiles/${profile.image}`}
+            className='w-20 h-20 object-cover border rounded-full'
+          />
+          <div className="grow ml-4">
+            <div className="flex itmes-center mb-4">
+              <h3>{profile.username}</h3>
+            
+              {isMaster && (  // 본인 프로필일때만 보이게 하기
+                <>
+                  {/* 정보수정 버튼 */}
+                  <Link to='/accounts/edit' className="ml-2 bg-gray-200 rounded-lg px-4 py-2 text-sm font-semibold">
+                    Edit profile
+                  </Link>
+                  {/* 로그아웃 버튼 */}
+                  <button 
+                    className="ml-2 bg-gray-200 px-4 py-2 text-sm font-semibold rounded-lg"
+                    onClick={handleSignOut}
+                  >
+                    Out
+                  </button>
+                </>
+              )}
+
+              {/* 팔로우 버튼 */}
+              {(!isMaster && profile.isFollowing) && ( //본인계정이 아니면서 팔로우하는 중인 경우 팔로우 취소 버튼
+                <button
+                 className="ml-2 bg-gray-200 text-sm px-4 py-2 font-semibold p-2 rounded-lg"
+                 onClick={handleUnfollow} // 클릭하면 언팔로우로 변경
+                 >
+                  Following
+                 </button>
+              )}
+
+              {(!isMaster && !profile.isFollowing) && ( // 본인계정이 아니면서 팔로우 하지않는 유저는 팔로우 버튼
+                <button
+                  className="ml-2 bg-blue-500 text-white text-sm px-4 py-2 font-semibold p-2 rounded-lg"
+                  onClick={handleFollow}
+                >
+                  Follow
+                </button>
+              )}
+            </div>
+
+            {/* 게시물 수, 팔로워 수, 팔로잉 수 */}
+            <ul className="flex items-center mb-4">
+              <li className="w-1/3">
+                <div className="text-sm">
+                  <span className="font-semibold">
+                    {profile.articleCount}
+                  </span>
+                  {" "}
+                  Photos
+                </div>
+              </li>
+              <li className="w-1/3">
+                <Link to={`/profiles/${username}/followers`} className='bolock text-sm'>
+                  <span className="font-semibold">
+                    {profile.followerCount}
+                  </span>
+                  {" "}
+                  following
+                </Link>
+              </li>
+              <li className="w-1/3">
+                <Link to={`profiles/${username}/following`} className='block text-sm'>
+                  <span className="font-semibold">
+                    {profile.FollowingCount}
+                  </span>
+                  {profile.followingCount}
+                  {" "}
+                  following
+                </Link>
+              </li>
+            </ul>
+
+            {/* 유저이름과 자기소개 */}
+            <div>
+              {profile.fullName && (  // fullName이 있으면 출력
+                <h3 className="text-sm font-semibold my-2">{profile.fullName}</h3>
+              )}
+              <p className="text-sm my-2">
+                {profile.bio}
+              </p>
+            </div>
+
+            {/* 모달 열기 버튼 (게시물 작성) */}
+            <button 
+              className="fixed right-8 bottom-8 hover:scale-110 transtion-all"
+              onClick={() => setActive(true)}
+            >
+              <svg 
+                className='w-6'
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 448 512"
+              >
+                <path d="M200 344V280H136C122.7 280 112 269.3 112 256C112 242.7 122.7 232 136 232H200V168C200 154.7 210.7 144 224 144C237.3 144 248 154.7 248 168V232H312C325.3 232 336 242.7 336 256C336 269.3 325.3 280 312 280H248V344C248 357.3 237.3 368 224 368C210.7 368 200 357.3 200 344zM0 96C0 60.65 28.65 32 64 32H384C419.3 32 448 60.65 448 96V416C448 451.3 419.3 480 384 480H64C28.65 480 0 451.3 0 416V96zM48 96V416C48 424.8 55.16 432 64 432H384C392.8 432 400 424.8 400 416V96C400 87.16 392.8 80 384 80H64C55.16 80 48 87.16 48 96z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <hr className="mt-4 mb-8" />
+
+      {/* 타임라인 */}
+      <Timeline articles={articles} articleCount={articleCount} />
+
+
+      {/* 게시물 작성 모달 */}
+      <ArticleCreate active={active} setActive={setActive} />
+    </>
+  )
 }
