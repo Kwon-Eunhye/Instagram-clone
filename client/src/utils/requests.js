@@ -39,7 +39,7 @@ export async function signIn(email, password) {
 // 정보 수정
 export async function updateProfile(formData) {
   const res = await fetch(`${server}/user`, {
-    mothod: "PUT",
+    method: "PUT",
     headers: {"Authorization": 'Bearer ' + JSON.parse(localStorage.getItem("user")).token},  // localStorage 브라우저의 저장공간, postman처럼 url을 입력하지않고 저장해온것을 불러옴
     body: formData  // 파일이 있을때 사용
   })
@@ -82,9 +82,9 @@ export async function doesEmailExists(email) {
 /* ARTICLES */
 
 // 피드
-export async function getFeed() {
-  const res = await fetch(`${server}/feed`, {
-    headers: {'Authorization': 'Beearer' + JSON.parse(localStorage.getItem("user")).token}
+export async function getFeed(skip) {
+  const res = await fetch(`${server}/feed?skip=${skip}`, {
+    headers: {'Authorization': 'Bearer' + JSON.parse(localStorage.getItem("user")).token}
   });
 
   if (!res.ok) {
@@ -110,11 +110,12 @@ export async function getArticle(id) {
 
 // 게시물 생성
 export async function createArticle(formData) {
-  const res =await fetch(`${server}/articles`, {
-    mothod: "POST",
-    headers: { "authorization": 'Bearer ' + JSON.parse(localStorage.getItem('user')).token},
+  const res = await fetch(`${server}/articles`, {
+    method: "POST",
+    headers: { "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem("user")).token},
     body: formData
   })
+
 
   if (!res.ok) {
     throw new Error(`${res.status} ${res.statusText}`)
@@ -128,7 +129,7 @@ export async function createArticle(formData) {
 export async function deleteArticle(id) {
   const res = await fetch(`${server}/articles/${id}`, {
     method: 'DELETE',
-    headers: { "authorization": 'Bearer ' + JSON.parse(localStorage.getItem('user')).token},
+    headers: { "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem('user')).token},
   })
 
   if (!res.ok) {
@@ -142,7 +143,7 @@ export async function deleteArticle(id) {
 export async function favorite(id) {
   const res = await fetch(`${server}/articles/${id}/favorite`, {
     method: 'POST',
-    headers: { "authorization": 'Bearer ' + JSON.parse(localStorage.getItem('user')).token},
+    headers: { "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem('user')).token},
   })
 
   if(!res.ok) {
@@ -156,7 +157,7 @@ export async function favorite(id) {
 export async function unfavorite(id) {
   const res =await fetch(`${server}/articles/${id}/favorite`, {
     method:'DELETE',
-    headers: { "authorization": 'Bearer ' + JSON.parse(localStorage.getItem('user')).token},
+    headers: { "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem('user')).token},
   })
 
   if(!res.ok) {
@@ -184,12 +185,13 @@ export async function getComments(id) { // 게시물의 id
 }
 
 // 댓글 생성
-export async function createComment(id,  content) {
+export async function createComment(id, content) {
+
   const res = await fetch(`${server}/articles/${id}/comments`, {
     method: "POST",
     headers: {
-      "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem('user')).token,
-      'Content-Type': 'application/json'
+      "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem("user")).token,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ content })
   })
@@ -205,8 +207,8 @@ export async function createComment(id,  content) {
 export async function deleteComment(id) { // 댓글 id
   const res = await fetch(`${server}/comments/${id}`, {
     method: 'DELETE',
-    headers: { 'Autthorization': 'Bearer ' + JSON.parse(localStorage.getItem('user')).token}
-  });
+    headers: { 'Authorization': 'Bearer ' + JSON.parse(localStorage.getItem("user")).token }
+  })
 
   if (!res.ok) {
     throw new Error(`${res.status} ${res.statusText}`);
@@ -214,6 +216,7 @@ export async function deleteComment(id) { // 댓글 id
 
   return await res.json();
 }
+
 /* PROFILES*/
 
 // 프로필 가져오기
@@ -245,7 +248,7 @@ export async function getTimeline(username) {
 
 // 팔로우 목록 가져오기
 
-export async function getFollower(username) {
+export async function getFollowers(username) {
   const res = await fetch(`${server}/users/?followers=${username}`, {
     headers: { 'Authorization': 'Bearer ' + JSON.parse(localStorage.getItem('user')).token }
   })
@@ -258,8 +261,8 @@ export async function getFollower(username) {
 }
 
 // 팔로잉 목록 가져오기
-export async function getFollowing(username) {
-  const res = await fetch(`${server}/users/?following_${username}`, {
+export async function getFollowings(username) {
+  const res = await fetch(`${server}/users/?following=${username}`, {
     headers: {'Authorization': 'Bearer ' + JSON.parse(localStorage.getItem('user')).token }
 
   })

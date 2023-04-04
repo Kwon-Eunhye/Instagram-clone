@@ -17,23 +17,6 @@ export default function Profile() {
   const [active, setActive] = useState(false);  // 모달 활성화
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   setProfile(null);
-
-  //   Promise.all([ // 모든 항목이 다 성공했을때 동작
-  //     getProfile(username), 
-  //     getTimeline(username)
-  //   ])
-  //     .then(([profileDate, timelineData]) => {
-  //       setProfile(profileDate.profile);
-  //       setArticles(timelineData.articles);
-  //       setArticleCount(timelineData.articleCount);
-  //     })  
-  //     .catch(error => { // 한개라도 실패했을 경우 not found 페이지로 이동
-  //       navigate('/notfound', { replace: true })
-  //     })
-
-  // }, [username])
 
   useEffect(() => {
 		setProfile(null);
@@ -55,14 +38,36 @@ export default function Profile() {
 	}, [username])
  
   // 로그아웃
-  function handleSignOut() {}
+  function handleSignOut() {
+    const confirmed = window.confirm('Are ypu sure to Logout?') // 확인 또는 취소를 물어보는 창 띄움
+
+    if(confirmed) {
+      setUser(null);
+    }
+  }
 
   // 팔로우
-  async function handleFollow() {}
+  async function handleFollow() {
+    try {
+      await follow(username);
+
+      setProfile({ ...profile, isFollowing: true });
+    } catch (error) {
+      alert(error)
+    }
+  }
 
 
   // 언팔로우
-  async function handleUnfollow() {}
+  async function handleUnfollow() {
+    try {
+      await unfollow(username);
+
+      setProfile({ ...profile, isFollowing: false });
+    } catch (error) {
+      alert(error)
+    }
+  }
 
   useEffect(() => {
     document.title = `${username} - Instagram`;
@@ -81,7 +86,7 @@ export default function Profile() {
             className='w-20 h-20 object-cover border rounded-full'
           />
           <div className="grow ml-4">
-            <div className="flex itmes-center mb-4">
+            <div className="flex items-center mb-4">
               <h3>{profile.username}</h3>
             
               {isMaster && (  // 본인 프로필일때만 보이게 하기
@@ -128,24 +133,23 @@ export default function Profile() {
                     {profile.articleCount}
                   </span>
                   {" "}
-                  Photos
+                  photos
                 </div>
               </li>
               <li className="w-1/3">
-                <Link to={`/profiles/${username}/followers`} className='bolock text-sm'>
+                <Link to={`/profiles/${username}/followers`} className='block text-sm'>
                   <span className="font-semibold">
                     {profile.followerCount}
                   </span>
                   {" "}
-                  following
+                  followers
                 </Link>
               </li>
               <li className="w-1/3">
-                <Link to={`profiles/${username}/following`} className='block text-sm'>
+                <Link to={`/profiles/${username}/following`} className='block text-sm'>
                   <span className="font-semibold">
-                    {profile.FollowingCount}
+                    {profile.followingCount}
                   </span>
-                  {profile.followingCount}
                   {" "}
                   following
                 </Link>
