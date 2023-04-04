@@ -61,7 +61,7 @@ async function seedDatabase() {
       const user = await User.findOne({ username: 'cat'});
 
       const article = new Article();
-      article.imgaes = [`${i}.jpeg`];
+      article.images = [`${i}.jpeg`];
       article.description = `cat photos ${i}`;
       article.author = user._id;
 

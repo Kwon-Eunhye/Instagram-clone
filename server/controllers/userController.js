@@ -193,7 +193,7 @@ exports.edit = [
         email: _user.email,
         username: _user.username,
         fullName: _user.fullName,
-        imgae: _user.image,
+        image: _user.image,
         bio: _user.bio,
         token
       }
